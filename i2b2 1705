@@ -1,0 +1,119 @@
+I2B2 1705 Installation
+Component	Download URL	Server(s)
+Java SE Development Kit 7u75	http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+(jdk-7u75-linux-x64.rpm and jdk-7u75-windows-x64.exe)	Database, Application
+Apache Ant 1.8.4	https://www.i2b2.org/software/projects/installer/apache-ant-1.8.4-bin.zip
+Database, Application
+JBoss 7.1.1	https://www.i2b2.org/software/projects/installer/jboss-7.1.1.Final.zip
+Application
+Apache Axis2	https://www.i2b2.org/software/projects/installer/axis2-1.6.2-war.zip
+Application
+i2b2 Data	https://www.i2b2.org/software/index.html (i2b2createdb-1704.zip)
+Database
+i2b2 Core	https://www.i2b2.org/software/index.html (i2b2core-src-1704.zip)
+Application
+i2b2 Webclient	https://www.i2b2.org/software/index.html (i2b2webclient-1704.zip)
+Application
+
+Java SE Development Kit Installation (Database and Application Servers)
+To install on the Application server, execute the jdk-7u75-windows-x64.exe file.
+To install on the Database server, use the following command:
+# rpm -ivh jdk-7u75-linux-x64.rpm
+And verify installation with the following command:
+# java -version
+java version "1.7.0_75"
+Java(TM) SE Runtime Environment (build 1.7.0_75-b13)
+Java HotSpot(TM) 64-Bit Server VM (build 24.75-b04, mixed mode)
+
+Apache HTTPD Installation
+1.	Use yum to install HTTPD on the Application server:
+# yum install httpd php openssl mod_ssl
+
+2.Edit /etc/httpd/conf.d/ssl.conf and update/add the following:
+
+##
+## SSL Virtual Host Context
+##
+<VirtualHost calv-i2b2appdev.med.usc.edu:80>
+     ServerName calv-i2b2appdev.med.usc.edu
+     Redirect / https://calv-i2b2appdev.med.usc.edu
+</VirtualHost>
+ProxyRequests off
+<VirtualHost calv-i2b2appdev.med.usc.edu:443>
+
+# General setup for the virtual host, inherited from global configuration
+ServerName calv-i2b2appdev.med.usc.edu
+SSLProxyEngine on
+ProxyPass /i2b2 http://localhost:9090/i2b2
+ProxyPassReverse /i2b2 http://localhost:9090/i2b2
+SSLProtocol -all +SSLv3 +TLSv1
+SSLCipherSuite ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM
+3.Configure httpd to run as a service at boot time:
+# chkconfig --level 345 httpd on
+1.	Start the httpd service:
+# service httpd restart
+ 
+2.	Edit the iptables to allow access on port 443: (/etc/syscongif/iptables)
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+ 
+3.	Restart the iptables service
+# service iptables restart
+
+
+Note: Edit these files according to the file in the successful installation of i2b2 app server(calv-i2b2appdev.med.usc.edu)
+
+Apache Ant Installation (Database and Application Servers)
+Unzip the Ant zip file to /opt on the Application server.
+
+
+JBoss Installation (Application Server)
+1.	Unzip the JBoss zip file to /opt on the Application server.
+2.	Edit /opt/jboss-as-7.1.1.Final/standalone/configuration/standalone.xml
+
+TODO: Add edits
+ 
+3.	Copy script for the JBoss service to /etc/init.d:
+# cp /opt/jboss-as-7.1.1.Final/bin/init.d/jboss-as-standalone.sh /etc/init.d/jboss-as
+4.	Edit the /etc/init.d/jboss-as script:
+JAVA_HOME=/usr/java/jdk1.7.0_75
+JBOSS_HOME=/opt/jboss-as-7.1.1.Final
+5.	Create a configuration file for the jboss-as service
+# mkdir /etc/jboss-as
+# cp /opt/jboss-as-7.1.1.Final/bin/init.d/jboss-as.conf /etc/jboss-as/
+6.	Edit /etc/jboss-as/jboss-as.conf:
+JBOSS_USER=jboss-as
+ 
+7.	Add the jboss-as user and change ownership of the JBoss installation files:
+# adduser -d /opt/jboss-as-7.1.1.Final/ jboss-as
+# chown -R jboss-as:jboss-as /opt/jboss-as-7.1.1.Final/
+8.	Edit the following line in /opt/jboss-as-7.1.1.Final/bin/standalone.conf:
+JAVA_OPTS="-Xms512m -Xmx3072m -XX:MaxPermSize=512m -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000"
+9.	Configure jboss to run as a service at system boot:
+# chkconfig --level 345 jboss-as on
+10.	 Start the JBoss service:
+# service jboss-as start
+Note: Edit all the files according to the Jboss files in Calv-i2b2appdev.med.usc.edu as reference
+# chmod 771 /etc/init.d/jboss-as
+# chmod 771 /opt/jboss-as-7.1.1.Final/bin/standalone.sh
+11.	From a web browser navigate to https://calv-i2b2appdev.med.usc.edu:9090/jboss and the JBoss welcome page should be displayed.
+Axis2 Installation (Application Server)
+1.	Stop the JBoss service:
+# service jboss-as stop
+2.	Create a directory to hold the Axis 2 files:
+# cd /root
+# mkdir axis2
+# cd axis2
+3.	Unzip the axis2-1.6.2-war.zip file.
+4.	Rename the axis2.war file to axis2.zip.
+5.	Create an i2b2.war directory under the JBoss deployments directory:
+# cd  /opt/jboss-as-7.1.1.Final/standalone/deployments
+# mkdir i2b2.war
+6.	Create an i2b2.war.dodeploy file to signal that this directory should be deployed by JBoss:
+# touch i2b2.war.dodeploy
+7.	Unzip the axis2.zip file under the i2b2.war directory:
+# cd i2b2.war
+# unzip ~/axis2/axis2.zip
+
+This is for the environment setup for i2b2 setup for shrine connection 
+For Application configuration (cells and web client installations we can follow the instructions from chris document in our confluence page or from the i2b2 community installation page). 
+
