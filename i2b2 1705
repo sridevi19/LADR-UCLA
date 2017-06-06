@@ -16,7 +16,7 @@ i2b2 Webclient	https://www.i2b2.org/software/index.html (i2b2webclient-1704.zip)
 Application
 
 Java SE Development Kit Installation (Database and Application Servers)
-To install on the Application server, execute the jdk-7u75-windows-x64.exe file.
+To install on the Application server,execute the jdk-7u75-windows-x64.exe file.
 To install on the Database server, use the following command:
 # rpm -ivh jdk-7u75-linux-x64.rpm
 And verify installation with the following command:
