@@ -1,1 +1,74 @@
+Install Shrine https://open.med.harvard.edu/wiki/display/SHRINE/Release+Notes
+
+# cd /opt/shrine/
+
+make sure you have shrine latest version currently we are using shrine version 20 and tomcat version 8.
+
+# cd /opt/shrine/v20/tomcat/lib
+# vi shrine.conf
+change the file according to the following
+
+shrine {
+  pmEndpoint {
+    url = "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/services/PMService/getServices"
+  }
+
+  ontEndpoint {
+    url = "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/rest/OntologyService/"
+  }
+
+  hiveCredentials {
+    domain = "DEWARS"
+    username = "demo"
+    password = "demouser"
+    crcProjectId = "LADR" 
+    ontProjectId = "SHRINE" //make sure you keep this change to SHRINE according to the project path added in database
+  }
+
+  queryEntryPoint {
+    authenticationType = "pm"
+    authorizationType = "none"
+    includeAggregateResults = false
+    attachSigningCert = true
+    broadcasterServiceEndpoint {
+      url = "http://ladr-hub.ctsi.ucla.edu/ladr-hub/shrine/rest/broadcaster/broadcast"
+    }
+    maxQueryWaitTime {
+      minutes = 5
+    }
+  }
+
+  adapter {
+    crcEndpoint {
+      url = "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/services/QueryToolService/"
+    }
+
+    setSizeObfuscation = true
+
+    adapterLockoutAttemptsThreshold = 1000
+
+    adapterMappingsFileName = "AdapterMappings.csv"
+
+    maxSignatureAge {
+      minutes = 5
+    }
+
+    immediatelyRunIncomingQueries = true
+  }
+
+  networkStatusQuery = "\\\\SHRINE\\SHRINE\\Diagnoses\\Mental Illness\\Disorders usually diagnosed in infancy, childhood, or adolescence\\Pervasive developmental disorders\\Infantile autism, current or active state\\"
+
+  humanReadableNodeName = "CHLA"
+
+  shrineDatabaseType = "mysql"
+
+  keystore {
+    file = "/opt/shrine/v20/shrine.keystore"
+    password = "DataBase Password"
+    privateKeyAlias = "63.247.3.251"
+    keyStoreType = "JKS"
+
+
+
+
 
