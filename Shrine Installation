@@ -1,0 +1,35 @@
+SHRINE (Shared Health Research Information Network) is a system for enabling clinical researchers to solve the problem of identifying sufficient numbers of patients to include in their studies by querying across distributed hospital electronic medical record systems.
+Building on the i2b2 platform, SHRINE enables federated queries across many independently operated patient databases.
+
+
+######   Manual Installation   #######
+
+****** Installation Best Practices   ********
+We recommend that you install i2b2 on a separate machine from SHRINE. i2b2 CRC searches can demand all operating system resources, which impacts SHRINE's responsiveness
+i2b2 VM image (v1.7.08b) installed on separate machine - https://www.i2b2.org/software/download.html?d=411&s=2
+The network topology for SHRINE should be a HUB and SPOKE network, generally with a web client, DSA, QEP, and adapter at each spoke
+
+
+Gather Site Information
+Site administrators will need to gather some information before setting up the SHRINE environment. This is generally some information regarding the use or governance of the application within their respective settings. Some things to consider are:
+The network setup for i2b2 and SHRINE
+Firewall ports and other networking needs (signing certificates, etc.)
+Network management
+ 
+Setting Up the Network
+All SHRINE nodes serve HTTPS, usually over port 6443. The hub will need to receive requests from each QEP (query entry point). Each adapter will need to receive requests from the hub. Each QEP will need to serve the SHRINE web app to individual researcher's browsers. This generally means opening firewall holes to receive HTTPS traffic from outside your network.
+A SHRINE node should encrypt all communication with i2b2 due to i2b2's plain text passwords and session keys in HTTP message bodies. We recommend configuring i2b2 to use HTTPS, or installing the i2b2 server on an encrypted subnet with SHRINE. Therefore, we do not recommend serving HTTP over a proxy.
+
+Setting Up the Host Machine - Prerequisites
+Set up a standard linux server with at least 1024 MB of memory (more is better), 10GB of disk space (more is better), and two or more physical cores
+. We test SHRINE with CentOS v 7.0 Minimal - http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1611.iso
+Install system packages for
+JDK 8 - http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+We have discovered important certs were missing in versions earlier than JDK8_121, so we recommend at least this version
+Install JDK  Expand source
+MySQL / MariaDB (or an off-board database)  - https://dev.mysql.com/downloads/repo/yum/
+Install MySQL  Expand source
+Apache Tomcat 8 (v8.0.39) - http://archive.apache.org/dist/tomcat/tomcat-8/
+Create directory /opt/shrine. Install Tomcat 8 in /opt/shrine/tomcat. Enable tomcat on boot.
+Install Tomcat  Expand source
+Postfix
