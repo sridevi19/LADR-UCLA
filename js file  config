@@ -1,0 +1,29 @@
+Configuring SHRINE Webclient Obfuscation
+
+cd /opt/shrine/tomcat/webapps/shrine-webclient/i2b2_config_data.js
+
+{
+    urlProxy: "/shrine-proxy/request",
+        urlFramework: "js-i2b2/",
+    loginTimeout: 15, // in seconds
+    //JIRA|SHRINE-519:Charles McGow
+    username_label:"test username:", //Username Label
+    password_label:"test password:", //Password Label
+    clientHelpUrl:'help/pdf/shrine-client-guide.pdf',
+    networkHelpUrl:'help/pdf/shrine-network-guide.pdf',
+    //JIRA|SHRINE-519:Charles McGow
+    // -------------------------------------------------------------------------------------------
+    // THESE ARE ALL THE DOMAINS A USER CAN LOGIN TO
+    lstDomains: [
+    {
+        domain: "i2b2demo",
+        name: "usc",
+        debug: true,
+        urlCellPM: "http://rdv-i2b2-app-test:9090/i2b2/services/PMService/",
+        //urlCellPM: "http://192.168.169.131/i2b2/services/PMService/",
+        allowAnalysis: true/*
+        //isSHRINE: true*/
+    }
+]
+    // -------------------------------------------------------------------------------------------
+}
