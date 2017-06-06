@@ -8,7 +8,254 @@ from the proxy server we can able to curl to ladr and from the ladr they need to
 
 from proxy server  try curl to ladr-hub
 
-curl -k http://ladr-hub.ctsi.ucla.edu
-curl -k http://ladr-hub.ctsi.ucla.edu/ladr-hub/
-curl -k http://ladr-hub.ctsi.ucla.edu/ladr-hub/shrine/rest/happy/version
+curl -k http://ladr-hub.ctsi.ucla.edu - results ladr hub page
+curl -k http://ladr-hub.ctsi.ucla.edu/ladr-hub/ - results ladr apache page
+curl -k http://ladr-hub.ctsi.ucla.edu/ladr-hub/shrine/rest/happy/version -- usually results tomcat page with some errors its not an issue
  
+from ladr-hub they will get the results of our server
+
+curl -k http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org/usc-devshrine/shrine/rest/adapter
+
+In our proxy server try curl -k http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:6443/
+curl -k http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:6443/ --- results tomcat page for app server
+curl -k http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:6443/shrine/rest/hapy/version/ ---- results shrine version and build date
+
+
+and the same test has to be done from the app
+ 
+ 
+ 
+from the app server try curl to proxy server
+curl -k http://rdv-shrine-proxy-test.lahrc.lahealthresearchcloud.org:6443/
+curl -k http://rdv-shrine-proxy-test.lahrc.lahealthresearchcloud.org:6443/shrine/rest/happy/version/ 
+
+If we can't able to curl to anyother from one other server.
+when we try to curl to proxy or to app server it results "Failed Connect to------------:Connection timed out"
+
+First we need to check either the java is installed correctly and also tomcat and jboss is running as well
+check with the following command 
+# ps -ef | grep java
+jboss-as 21534 21471  0 May30 ?        00:08:14 /usr/java/jdk1.7.0_75/bin/java -D[Standalone] -server -XX:+UseCompressedOops -XX:+TieredCompilation -Xms2048m -Xmx3072m -XX:MaxPermSize=512m -Xrs -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Djboss.server.default.config=standalone.xml -Dorg.jboss.boot.log.file=/opt/jboss-as-7.1.1.Final/standalone/log/boot.log -Dlogging.configuration=file:/opt/jboss-as-7.1.1.Final/standalone/configuration/logging.properties -jar /opt/jboss-as-7.1.1.Final/jboss-modules.jar -mp /opt/jboss-as-7.1.1.Final/modules -jaxpmodule javax.xml.jaxp-provider org.jboss.as.standalone -Djboss.home.dir=/opt/jboss-as-7.1.1.Final -c standalone.xml
+root     28689     1  0 Jun05 ?        00:04:49 /opt/java/jdk1.7.0_79//bin/java -Djava.util.logging.config.file=/opt/shrine/v20/tomcat/conf/logging.properties -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -XX:MaxPermSize=256m -Djava.endorsed.dirs=/opt/shrine/v20/tomcat/endorsed -classpath /opt/shrine/v20/tomcat/bin/bootstrap.jar:/opt/shrine/v20/tomcat/bin/tomcat-juli.jar -Dcatalina.base=/opt/shrine/v20/tomcat -Dcatalina.home=/opt/shrine/v20/tomcat -Djava.io.tmpdir=/opt/shrine/v20/tomcat/temp org.apache.catalina.startup.Bootstrap start
+root     29988 29689  0 14:10 pts/1    00:00:00 grep java
+ so here jboss is running under process id 21534
+ and tomcat is running under process id 28689
+ 
+ check the port numbers 
+ 
+ #netstat tulpn
+ 
+ Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address               Foreign Address             State       PID/Program name
+tcp        0      0 127.0.0.1:5905              0.0.0.0:*                   LISTEN      16213/Xvnc
+tcp        0      0 127.0.0.1:3350              0.0.0.0:*                   LISTEN      1761/xrdp-sesman
+tcp        0      0 0.0.0.0:22                  0.0.0.0:*                   LISTEN      1739/sshd
+tcp        0      0 127.0.0.1:631               0.0.0.0:*                   LISTEN      1595/cupsd
+tcp        0      0 127.0.0.1:25                0.0.0.0:*                   LISTEN      1843/master
+tcp        0      0 0.0.0.0:3389                0.0.0.0:*                   LISTEN      1756/xrdp
+tcp        0      0 0.0.0.0:4447                0.0.0.0:*                   LISTEN      21534/java
+tcp        0      0 0.0.0.0:9090                0.0.0.0:*                   LISTEN      21534/java
+tcp        0      0 0.0.0.0:9990                0.0.0.0:*                   LISTEN      21534/java
+tcp        0      0 0.0.0.0:3306                0.0.0.0:*                   LISTEN      9519/mysqld
+tcp        0      0 127.0.0.1:5902              0.0.0.0:*                   LISTEN      16020/Xvnc
+tcp        0      0 0.0.0.0:9999                0.0.0.0:*                   LISTEN      21534/java
+tcp        0      0 :::22                       :::*                        LISTEN      1739/sshd
+tcp        0      0 ::1:631                     :::*                        LISTEN      1595/cupsd
+tcp        0      0 :::6009                     :::*                        LISTEN      28689/java
+tcp        0      0 ::1:25                      :::*                        LISTEN      1843/master
+tcp        0      0 :::443                      :::*                        LISTEN      23796/httpd
+tcp        0      0 ::ffff:127.0.0.1:8005       :::*                        LISTEN      28689/java
+tcp        0      0 :::6443                     :::*                        LISTEN      28689/java
+tcp        0      0 :::6060                     :::*                        LISTEN      28689/java
+tcp        0      0 :::80                       :::*                        LISTEN      23796/httpd
+udp        0      0 0.0.0.0:68                  0.0.0.0:*                               1598/dhclient
+udp        0      0 0.0.0.0:631                 0.0.0.0:*                               1595/cupsd
+udp        0      0 :::52311                    :::*                                    2027/BESClient
+
+ 
+[root@rdv-shrine-app-test shrine]# netstat -tulpn | grep 9090
+tcp        0      0 0.0.0.0:9090                0.0.0.0:*                   LISTEN      21534/java
+[root@rdv-shrine-app-test shrine]#
+[root@rdv-shrine-app-test shrine]# netstat -tulpn | grep 6443
+tcp        0      0 :::6443                     :::*                        LISTEN      28689/java
+
+So we are good, there is a problem on the network side we solved this problem by disabling the firewall first and enabled firewall 
+and started connecting to ladr via the port number 6443. Checked whether the port number is passing the request to correct site using correct port.
+
+In app server
+cd /etc/httpd/conf.d
+vi ssl.conf
+check hosts have been added or not.
+
+<VirtualHost rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:80>
+        ServerName rdv-shrine-app-test.lahrc.lahealthresearchcloud.org
+        Redirect / https://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org
+</VirtualHost>
+
+ProxyRequests off
+
+<VirtualHost rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:443>
+
+# General setup for the virtual host, inherited from global configuration
+#DocumentRoot "/var/www/html"
+#ServerName www.example.com:443
+ServerName rdv-shrine-app-test.lahrc.lahealthresearchcloud.org
+
+
+SSLProxyEngine on
+
+ProxyPass /i2b2 http://localhost:9090/i2b2
+ProxyPassReverse /i2b2 http://localhost:9090/i2b2
+
+restart httpd
+sudo service httpd stp
+sudo service httpd start
+
+In proxy server
+
+cd /etc/httpd/conf.d
+vi proxy_ajp.conf
+
+ProxyRequests On
+ProxyVia On
+AllowCONNECT 80 6443
+<Proxy *>
+Order allow,deny
+Allow from all
+Allow from 63.247.3.252 --- rdv-shrine-app server
+Allow from 164.67.204.71 ---- ladr hub ip
+Allow from 127.0.0.1
+</Proxy>
+ProxyPass /chla-devshrine/ ajp://63.247.3.252:6009/ timeout=240 --- ladr chla connection
+
+If we need to add more servers add
+Allow from ServerIP
+and ProxyPass url generated by LADR guys.
+
+restart httpd
+
+https://63.247.3.251:6443/chla-devshrine/ ----- you should see the tomcat successfull page then only your tomcat is started.
+
+In app server
+cd /opt/shrine/v20/tomcat/webapps/shrine-webclient/i2b2_config_data.js
+edit to following
+{
+    urlProxy: "/chla-devshrine/shrine-proxy/request", ---- this url must be equal to Proxypass url in proxy server.
+        urlFramework: "js-i2b2/",
+    loginTimeout: 15, // in seconds
+    //JIRA|SHRINE-519:Charles McGow
+    username_label:"test username:", //Username Label
+    password_label:"test password:", //Password Label
+    clientHelpUrl:'help/pdf/shrine-client-guide.pdf',
+    networkHelpUrl:'help/pdf/shrine-network-guide.pdf',
+    //JIRA|SHRINE-519:Charles McGow
+    // -------------------------------------------------------------------------------------------
+    // THESE ARE ALL THE DOMAINS A USER CAN LOGIN TO
+    lstDomains: [
+    {
+        domain: "dewars",
+        name: "DEWARS",
+        debug: true,
+        urlCellPM: "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/services/PMService/",
+        //urlCellPM: "http://192.168.169.131/i2b2/services/PMService/",
+        allowAnalysis: true/*
+        //isSHRINE: true*/
+    }
+]
+    // -------------------------------------------------------------------------------------------
+}
+
+
+https://63.247.3.251:6443/chla-devshrine/shrine-webclient/
+ try with username: shrine
+ password:demouser
+ 
+ If it shows pm cell error.
+ 
+ It might be two problems 
+ one is with the shrine.conf file
+ other one is the database entry
+ 
+ First we will go through shrine.conf file
+ 
+ shrine {
+  pmEndpoint {
+    url = "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/services/PMService/getServices"
+  }
+
+  ontEndpoint {
+    url = "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/rest/OntologyService/"
+  }
+
+  hiveCredentials {
+    domain = "DEWARS"
+    username = "demo" --- add these entries
+    password = "demouser" --- add these entries in the database
+    crcProjectId = "LADR"
+    ontProjectId = "SHRINE"
+  }
+
+  queryEntryPoint {
+    authenticationType = "pm"
+    authorizationType = "none"
+    includeAggregateResults = false
+    attachSigningCert = true
+    broadcasterServiceEndpoint {
+      url = "http://ladr-hub.ctsi.ucla.edu/ladr-hub/shrine/rest/broadcaster/broadcast"
+    }
+    maxQueryWaitTime {
+      minutes = 5
+    }
+  }
+
+  adapter {
+    crcEndpoint {
+      url = "http://rdv-shrine-app-test.lahrc.lahealthresearchcloud.org:9090/i2b2/services/QueryToolService/"
+    }
+
+    setSizeObfuscation = true
+
+    adapterLockoutAttemptsThreshold = 1000
+
+    adapterMappingsFileName = "AdapterMappings.csv"
+
+    maxSignatureAge {
+      minutes = 5
+    }
+
+    immediatelyRunIncomingQueries = true
+  }
+
+  networkStatusQuery = "\\\\SHRINE\\SHRINE\\Diagnoses\\Mental Illness\\Disorders usually diagnosed in infancy, childhood, or adolescence\\Pervasive developmental disorders\\Infantile autism, current or active state\\"
+
+  humanReadableNodeName = "CHLA"
+
+  shrineDatabaseType = "mysql"
+
+  keystore {
+    file = "/opt/shrine/v20/shrine.keystore"
+    password = Keck pwd
+    privateKeyAlias = "63.247.3.251"
+    keyStoreType = "JKS"
+    caCertAliases = ["shrine-hub-ca"]
+  }
+}
+
+
+Restart httpd and tomcat 
+
+
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
