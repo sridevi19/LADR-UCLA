@@ -1,0 +1,5 @@
+For  CHLA Ladr we were using rdv-i2b2-db-test.lahrc.lahealthresearchcloud.org database
+
+we have two separate database schemas ladrhive and ladrpm which has shrine project paths and users
+
+
