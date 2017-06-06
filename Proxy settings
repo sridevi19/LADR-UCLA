@@ -1,0 +1,14 @@
+We are connecting to the LADR-HUb via proxy server 
+
+Currently we are using rdv-shrine-proxy-test.lahrc.lahealthresearchcloud.org proxy server
+
+so the routing will be like rdv-shrine-app-test -> rdv-shrine-proxy-test ->ladr-hub
+
+from the proxy server we can able to curl to ladr and from the ladr they need to connect to app server via proxy
+
+from proxy server  try curl to ladr-hub
+
+curl -k http://ladr-hub.ctsi.ucla.edu
+curl -k http://ladr-hub.ctsi.ucla.edu/ladr-hub/
+curl -k http://ladr-hub.ctsi.ucla.edu/ladr-hub/shrine/rest/happy/version
+ 
