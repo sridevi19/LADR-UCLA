@@ -10,26 +10,66 @@ i2b2 VM image (v1.7.08b) installed on separate machine - https://www.i2b2.org/so
 The network topology for SHRINE should be a HUB and SPOKE network, generally with a web client, DSA, QEP, and adapter at each spoke
 
 
-Gather Site Information
-Site administrators will need to gather some information before setting up the SHRINE environment. This is generally some information regarding the use or governance of the application within their respective settings. Some things to consider are:
-The network setup for i2b2 and SHRINE
-Firewall ports and other networking needs (signing certificates, etc.)
-Network management
+******  Gather Site Information  *******
+   - Site administrators will need to gather some information before setting up the SHRINE environment. This is generally some information regarding the use or governance of the application within their respective settings. Some things to consider are:
+   - The network setup for i2b2 and SHRINE
+   - Firewall ports and other networking needs (signing certificates, etc.)
+   - Network management
  
-Setting Up the Network
-All SHRINE nodes serve HTTPS, usually over port 6443. The hub will need to receive requests from each QEP (query entry point). Each adapter will need to receive requests from the hub. Each QEP will need to serve the SHRINE web app to individual researcher's browsers. This generally means opening firewall holes to receive HTTPS traffic from outside your network.
-A SHRINE node should encrypt all communication with i2b2 due to i2b2's plain text passwords and session keys in HTTP message bodies. We recommend configuring i2b2 to use HTTPS, or installing the i2b2 server on an encrypted subnet with SHRINE. Therefore, we do not recommend serving HTTP over a proxy.
+***** Setting Up the Network *******
+    - All SHRINE nodes serve HTTPS, usually over port 6443. The hub will need to receive requests from each QEP (query entry point). Each adapter will need to receive requests from the hub. Each QEP will need to serve the SHRINE web app to individual researcher's browsers. This generally means opening firewall holes to receive HTTPS traffic from outside your network.
+    - A SHRINE node should encrypt all communication with i2b2 due to i2b2's plain text passwords and session keys in HTTP message bodies. We recommend configuring i2b2 to use HTTPS, or installing the i2b2 server on an encrypted subnet with SHRINE. Therefore, we do not recommend serving HTTP over a proxy.
 
-Setting Up the Host Machine - Prerequisites
-Set up a standard linux server with at least 1024 MB of memory (more is better), 10GB of disk space (more is better), and two or more physical cores
-. We test SHRINE with CentOS v 7.0 Minimal - http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1611.iso
-Install system packages for
-JDK 8 - http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-We have discovered important certs were missing in versions earlier than JDK8_121, so we recommend at least this version
-Install JDK  Expand source
+****** Setting Up the Host Machine - Prerequisites *******
+   - Set up a standard linux server with at least 1024 MB of memory (more is better), 10GB of disk space (more is better), and two or more physical cores
+   - We test SHRINE with CentOS v 7.0 Minimal - http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1611.iso
+******* Install system packages *******
+   -  JDK 8 - http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+   -   We have discovered important certs were missing in versions earlier than JDK8_121, so we recommend at least this version
+****** Install JDK  Expand source  ******
 MySQL / MariaDB (or an off-board database)  - https://dev.mysql.com/downloads/repo/yum/
 Install MySQL  Expand source
 Apache Tomcat 8 (v8.0.39) - http://archive.apache.org/dist/tomcat/tomcat-8/
-Create directory /opt/shrine. Install Tomcat 8 in /opt/shrine/tomcat. Enable tomcat on boot.
-Install Tomcat  Expand source
-Postfix
+Create directory /opt/shrine. Install Tomcat 8 in /opt/shrine/tomcat. 
+
+****** Install SHRINE ******
+Deploy Shrine .war files
+We will retrieve all the new SHRINE .war files from the HMS Sonatype Nexus server at: https://repo.open.med.harvard.edu/nexus/content/groups/public/net/shrine/. From there, we will download the following war files to the /opt/shrine/tomcat/webapps/ directory on the SHRINE server and rename them accordingly:
+- shrine.war
+- steward.war
+- shrine-proxy.war
+- shrine-webclient-1.22.8-dist.zip
+- shrine-dashboard.war
+- shrine-meta.war
+
+
+*******  Other Configuration Tasks   *********
+
+Template Tomcat context.xml to look like this: 
+context.xml 
+Template Tomcat's server.xml file to look like this:
+server.xml  
+Template Steward.xml to look like this: 
+steward.xml  
+Download these tomcat_db_driver_jars and place into $TOMCAT_HOME/webapps/shrine/WEB-INF/lib:
+jtds-1.3.1.jar (if you are using MS SQL) - https://sourceforge.net/projects/jtds/files/jtds/1.3.1/
+mysql-connector-java-5.1.38-bin.jar (for users of MySQL, which is Shrine's default) - https://mvnrepository.com/artifact/mysql/mysql-connector-java/5.1.38
+ojdbc7.jar (if you are using Oracle) - http://www.oracle.com/technetwork/database/features/jdbc/jdbc-drivers-12c-download-1958347.html
+
+******* Setting Up Shrine Databases ********
+SHRINE uses four databases:
+shrine_query_history
+The shrine_query_history is the main operational database for shrine. It is primarily used by SHRINE's adapter, but also holds the problems table. The shrine_query_history schema starts at line 7 of shrine_query_history mysql.ddl . Install that schema in a database named shrine_query_schema.
+
+stewardDB
+The stewardDB is the operational database for the DSA. Its schema is in stewardDB mysql.ddl. Install that schema in a database named stewardDB. 
+
+qepAuditDB
+The qepAuditDB keeps an audit of researcher actions on the QEP. It also holds a cache of queries and results. Its schema is in qepAuditDB mysql.ddl. Install that schema in a database named qepAuditDB.
+
+adapterAuditDB
+The adapterAuditDB keeps an audit of researcher actions on the adapter. It starts at the beginning of shrine_query_history mysql.ddl . Install that schema in a database named adapterAuditDB.
+
+Creating the Keystore
+A new keystore should be created at /opt/shrine/shrine.keystore. For more information, please see Using a Certificate Authority for SHRINE.
+
