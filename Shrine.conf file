@@ -1,0 +1,92 @@
+Shrine.conf
+Supported Data Types
+
+
+For example:
+isQueryable = true
+ 
+setSizeObfuscation = false
+ 
+shrineDatabaseType = "mysql"
+ 
+adapterLockoutAttemptsThreshold = 42
+
+Durations
+Durations in older parts of the code are specified as a block containing a single numeric property with a name of either milliseconds, seconds, minutes, hours, or days.  For example :
+maxSignatureAge { days = 5 }
+ 
+maxQueryWaitTime { minutes = 0.5 }
+In 1.23 we will convert all of these blocks to a format that matches Scala Durations and allows for default values in Typesafe Config.
+maxSignatureAge = "5 days"
+ 
+maxQueryWaitTime = "30 seconds"
+ 
+Endpoints
+Endpoints are URLs with parameters, specified as blocks with the following properties:
+url (mandatory string): the URL of the endpoint
+timeout (optional duration, default is infinity): how long should clients wait for responses from this endpoint before throwing an exception.
+For example:
+crcEndpoint { url = "http://example.com/i2b2" }
+ 
+crcEndpoint {
+  url = "http://example.com/i2b2"
+  timeout { minutes = 1 }
+}
+ 
+Credentials
+Credentials are specified as blocks with the following properties:
+domain (optional string): the user's domain, if any
+username (mandatory string): the user's username
+password (mandatory string): the user's password
+For example:
+sheriffCredentials {
+  username = "sheriffUsername"
+  password = "sheriffPassword"
+}
+ 
+fooCredentials {
+  domain = "shrine"
+  username = "foo"
+  password = "bar"
+}
+ 
+i2b2 Hive Credentials
+i2b2 hive credentials for use with a CRC or other i2b2 cell are specified as blocks with the following properties:
+domain (mandatory string): the user's i2b2 domain
+username (mandatory string): the user's username
+password (mandatory string): the user's password
+crcProjectId (mandatory string): the user's i2b2 project id for use when logging into the CRC
+ontProjectId (mandatory string): the user's i2b2 project id for use when logging into the Ontology cell
+For example:
+hiveCredentials {
+  domain = "HarvardDemo"
+  username = "demo"
+  password = "demouser"
+  crcProjectId = "Demo"
+  ontProjectId = "SHRINE"
+}
+ 
+Keystore Parameters
+Keystore parameters are expressed using a block with the following properties:
+file (mandatory string): the name of the keystore file on the classpath
+password (mandatory string): the keystore's passwordkeystoreType (String, default is 'JKS'): the type of the keystore.  Allowed values are 'JKS' and 'PKCS12'.
+privateKeyAlias (optional string): In the keystore, the alias of the cert with private key component used to identify this node.  The cert with this alias will be used to sign outbound queries.
+keyStoreType (optional string): A string describing the format of the keystore. Allowed values are 'JKS' and 'PKCS12'; the default is 'PKCS12'.
+caCertAliases (optional array of strings): In the keystore, the aliases, if any certs belonging to certificate authorities this node should trust
+For example:
+keystore {
+  file = "shrine.keystore"
+  password = "changethisplease"
+  privateKeyAlias = "test-cert"
+  keyStoreType = "PKCS12"
+  caCertAliases = [shrine-ca, some-other-ca]
+}
+ 
+SHRINE Proxy
+The SHRINE proxy is configured by a block with a single property, timeout, a duration.  Timeout specifies the amount of time the proxy should wait for a response from the url being proxied.  The default is to wait forever.
+For example:
+proxy {
+  timeout {
+    minutes = 5
+  }
+}
